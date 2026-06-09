@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Growth vs Carbon — ASEAN Decoupling Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0C1A1D; --panel:#122A2E; --panel2:#16343A; --line:#234349;
+    --jade:#4FD1A5; --jade-dim:#2E7E66; --ember:#E8825A; --ember-dim:#9C5238;
+    --bone:#ECE7DC; --muted:#7E969C; --muted2:#56727A;
+    --good:var(--jade); --bad:var(--ember);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ink); color:var(--bone);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.5;
+    -webkit-font-smoothing:antialiased; padding:0 0 80px;
+    background-image:radial-gradient(circle at 15% -10%, rgba(79,209,165,.07), transparent 45%),
+                     radial-gradient(circle at 95% 5%, rgba(232,130,90,.06), transparent 40%);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+  .mono{font-family:'JetBrains Mono',monospace}
+  .disp{font-family:'Space Grotesk',sans-serif}
+
+  /* hero */
+  header{padding:64px 0 28px;border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.22em;
+    text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:20px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--jade);box-shadow:0 0 10px var(--jade);animation:pulse 2.4s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(34px,6vw,60px);
+    line-height:1.02;letter-spacing:-.02em;max-width:14ch}
+  h1 .em{color:var(--ember)} h1 .jd{color:var(--jade)}
+  .lede{margin-top:18px;max-width:62ch;color:#C3CFCF;font-size:17px}
+  .status{margin-top:22px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--muted);
+    display:flex;flex-wrap:wrap;gap:18px;align-items:center}
+  .status b{color:var(--bone);font-weight:500}
+
+  section{padding:44px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .sec-num{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--jade);letter-spacing:.1em}
+  h2{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:23px;letter-spacing:-.01em}
+  .sec-sub{color:var(--muted);font-size:14.5px;max-width:64ch;margin-bottom:26px;margin-top:8px}
+
+  /* legend */
+  .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:18px}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .sw{width:11px;height:11px;border-radius:2px;display:inline-block}
+
+  /* charts */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  text{font-family:'JetBrains Mono',monospace}
+
+  /* controls */
+  .controls{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:720px){.controls{grid-template-columns:1fr}}
+  .ctl{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .ctl-label{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+    font-family:'JetBrains Mono',monospace;display:flex;justify-content:space-between;margin-bottom:10px}
+  .ctl-label b{color:var(--jade);font-weight:500}
+  input[type=range]{width:100%;height:4px;-webkit-appearance:none;appearance:none;
+    background:var(--line);border-radius:3px;outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;
+    background:var(--jade);cursor:pointer;border:3px solid var(--ink);box-shadow:0 0 0 1px var(--jade)}
+  input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--jade);
+    cursor:pointer;border:3px solid var(--ink)}
+  select{background:var(--panel2);color:var(--bone);border:1px solid var(--line);border-radius:8px;
+    padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;width:100%}
+  .hint{font-size:11.5px;color:var(--muted2);margin-top:9px;font-family:'Inter',sans-serif}
+
+  /* ranked list */
+  .rank{display:flex;flex-direction:column;gap:9px}
+  .row{display:grid;grid-template-columns:26px 130px 1fr 78px;gap:12px;align-items:center;font-size:13.5px}
+  .row .pos{font-family:'JetBrains Mono',monospace;color:var(--muted);font-size:12px}
+  .row .nm{font-weight:500}
+  .bar-track{height:22px;background:var(--panel2);border-radius:5px;position:relative;overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px;transition:width .5s cubic-bezier(.2,.7,.2,1)}
+  .row .val{text-align:right;font-family:'JetBrains Mono',monospace;font-size:13px}
+
+  /* diverging bars */
+  .dbar{display:grid;grid-template-columns:128px 1fr;gap:12px;align-items:center;margin-bottom:9px;font-size:13px}
+  .dbar .nm{font-weight:500}
+  .dwrap{position:relative;height:24px;background:var(--panel2);border-radius:5px}
+  .dmid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--muted2)}
+  .dseg{position:absolute;top:3px;height:18px;border-radius:4px;transition:all .5s ease}
+
+  /* table */
+  .tbl-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  table{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+  th,td{padding:11px 14px;text-align:right;border-bottom:1px solid var(--line)}
+  th{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--muted);cursor:pointer;user-select:none;white-space:nowrap;position:sticky;top:0;background:var(--panel)}
+  th:hover{color:var(--bone)}
+  th.arrow::after{content:" ↓";color:var(--jade)}
+  th.arrow.asc::after{content:" ↑"}
+  td:first-child,th:first-child{text-align:left}
+  tbody tr:hover{background:var(--panel2)}
+  td.num{font-family:'JetBrains Mono',monospace}
+  .pill{font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .pill.abs{background:rgba(79,209,165,.16);color:var(--jade)}
+  .pill.rel{background:rgba(79,209,165,.08);color:#9fd9c4}
+  .pill.no{background:rgba(232,130,90,.16);color:var(--ember)}
+  .flag{color:var(--ember);font-family:'JetBrains Mono',monospace;font-size:11px}
+
+  /* time series selector */
+  .ts-head{display:flex;gap:12px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .ts-head select{width:auto;min-width:180px}
+
+  .method{font-size:13.5px;color:var(--muted);max-width:74ch}
+  .method h3{font-family:'Space Grotesk';color:var(--bone);font-size:15px;margin:18px 0 6px;font-weight:600}
+  .method code{font-family:'JetBrains Mono';font-size:12px;background:var(--panel2);padding:1px 6px;border-radius:4px;color:#bcd}
+  .method a{color:var(--jade)}
+  .err{background:rgba(232,130,90,.1);border:1px solid var(--ember-dim);color:#f0b59c;
+    padding:16px 18px;border-radius:12px;font-size:14px}
+  .skeleton{height:220px;background:linear-gradient(90deg,var(--panel) 25%,var(--panel2) 50%,var(--panel) 75%);
+    background-size:200% 100%;animation:sh 1.4s infinite;border-radius:12px}
+  @keyframes sh{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  .footnote{color:var(--muted2);font-size:12px;margin-top:14px;font-family:'JetBrains Mono'}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="eyebrow"><span class="dot"></span> Live · World Bank Open Data · ASEAN-10</div>
+  <h1>Who is breaking the link between <span class="jd">growth</span> and <span class="em">carbon</span>?</h1>
+  <p class="lede">Real GDP keeps climbing across Southeast Asia. Emissions don't have to. This pulls the World Bank API live and asks, country by country, whether output is pulling away from CO₂ — and who pollutes less than their income would predict.</p>
+  <div class="status" id="status"><span>Fetching live data…</span></div>
+</div></header>
+
+<!-- 1. RESIDUAL SCATTER -->
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">01</span><h2>Cleaner than their income predicts</h2></div>
+  <p class="sec-sub">Each economy plotted by income (GDP per capita, log scale) against CO₂ per capita, latest shared year. The line is the cross-country trend. Points <b style="color:var(--jade)">below</b> the line emit less than their wealth would suggest; points <b style="color:var(--ember)">above</b> emit more. The vertical gap is the residual — the part you can't look up anywhere.</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--jade)"></i> below trend (cleaner)</span>
+    <span><i class="sw" style="background:var(--ember)"></i> above trend (dirtier)</span>
+    <span><i class="sw" style="background:var(--muted2)"></i> fitted trend</span>
+  </div>
+  <div class="card" id="scatter-card"><div class="skeleton"></div></div>
+</div></section>
+
+<!-- 2. CONTROLS -->
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">02</span><h2>Set the window and your priorities</h2></div>
+  <p class="sec-sub">Decoupling depends on the period you measure and what you weight. Change the start year, then tune how much each factor counts toward the composite score below — the ranking re-sorts live. That subjectivity is the point; a static report can't do it.</p>
+  <div class="controls">
+    <div class="ctl">
+      <div class="ctl-label">Comparison window starts <b id="yr-out">2000</b></div>
+      <input type="range" id="yr" min="2000" max="2018" value="2000" step="1">
+      <div class="hint">Growth and emission change are measured from this year to the latest shared year.</div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-label">Weight · decoupling gap <b id="w1-out">40%</b></div>
+      <input type="range" id="w1" min="0" max="100" value="40">
+      <div class="hint">How far GDP growth outran emissions growth over the window.</div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-label">Weight · intensity trend <b id="w2-out">35%</b></div>
+      <input type="range" id="w2" min="0" max="100" value="35">
+      <div class="hint">How fast CO₂ per dollar of GDP is falling (annualised).</div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-label">Weight · low current emissions <b id="w3-out">25%</b></div>
+      <input type="range" id="w3" min="0" max="100" value="25">
+      <div class="hint">Latest CO₂ per capita — rewards a lower starting point.</div>
+    </div>
+  </div>
+</div></section>
+
+<!-- 3. COMPOSITE RANK -->
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">03</span><h2>Composite decoupling score</h2></div>
+  <p class="sec-sub">Z-scored across the ten economies, combined with your weights. Higher is better. Re-sorts as you move the sliders above.</p>
+  <div class="rank" id="rank"></div>
+</div></section>
+
+<!-- 4. DIVERGING GROWTH VS CO2 -->
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">04</span><h2>Growth versus emissions, over the window</h2></div>
+  <p class="sec-sub">Total real GDP change (right, jade) against total CO₂ change (left, ember) since the start year. When the jade bar dwarfs the ember one — or the ember one points left — the economy is pulling apart from its carbon.</p>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--ember)"></i> CO₂ change</span>
+    <span><i class="sw" style="background:var(--jade)"></i> GDP change</span>
+  </div>
+  <div id="diverge"></div>
+</div></section>
+
+<!-- 5. TIME SERIES -->
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">05</span><h2>One country, two lines</h2></div>
+  <p class="sec-sub">Both rebased to 100 at the window start. When jade (GDP) climbs while ember (CO₂) flattens or falls, that's decoupling you can watch happen.</p>
+  <div class="ts-head">
+    <select id="ts-country"></select>
+    <span class="legend" style="margin:0"><span><i class="sw" style="background:var(--jade)"></i> GDP (real, =100)</span><span><i class="sw" style="background:var(--ember)"></i> CO₂ (=100)</span></span>
+  </div>
+  <div class="card" id="ts-card"><div class="skeleton"></div></div>
+</div></section>
+
+<!-- 6. TABLE -->
+<section><div class="wrap">
+  <div class="sec-head"><span class="sec-num">06</span><h2>Every number, sortable</h2></div>
+  <p class="sec-sub">Click a header to sort. Flags mark where the latest shared year is older than 2021 or an input was missing.</p>
+  <div class="tbl-scroll"><table id="tbl"></table></div>
+  <p class="footnote" id="tbl-note"></p>
+</div></section>
+
+<!-- 7. METHOD -->
+<section style="border-bottom:none"><div class="wrap">
+  <div class="sec-head"><span class="sec-num">07</span><h2>How this is built</h2></div>
+  <div class="method">
+    <p>Everything here is computed in your browser from four World Bank series, fetched live on load. Nothing is hard-coded, so the numbers move when the World Bank updates.</p>
+    <h3>Series pulled</h3>
+    <p>Real GDP <code>NY.GDP.MKTP.KD</code> · GDP per capita, real <code>NY.GDP.PCAP.KD</code> · CO₂ total, excl. LULUCF <code>EN.GHG.CO2.MT.CE.AR5</code> · CO₂ per capita <code>EN.GHG.CO2.PC.CE.AR5</code>. The CO₂ series is the EDGAR-sourced GHG release the World Bank now publishes, which covers every country annually with a short lag.</p>
+    <h3>Decoupling classification</h3>
+    <p><b>Absolute</b> = GDP rose while CO₂ fell. <b>Relative</b> = both rose but CO₂ slower (intensity falling). <b>None</b> = CO₂ kept pace or outran GDP.</p>
+    <h3>The four metrics</h3>
+    <p>Decoupling gap = GDP change − CO₂ change over the window. Intensity trend = annualised change in CO₂ per dollar of GDP (negative is good). Composite = weighted average of z-scores you control. Residual = each country's distance from an OLS fit of CO₂ per capita on log GDP per capita across all ten.</p>
+    <h3>Cautions built in</h3>
+    <p>Each country uses its latest year where GDP and CO₂ both exist; mismatched or pre-2021 latest years are flagged. CO₂ data lags 2–3 years, so the "latest" is rarely the calendar year. Ten countries is a small sample for a regression — treat the residual as a conversation-starter, not a verdict.</p>
+    <p style="margin-top:16px"><a href="https://data.worldbank.org" target="_blank" rel="noopener">data.worldbank.org →</a></p>
+  </div>
+</div></section>
+
+<script>
+const COUNTRIES=[
+  {iso:'BRN',name:'Brunei'},{iso:'KHM',name:'Cambodia'},{iso:'IDN',name:'Indonesia'},
+  {iso:'LAO',name:'Laos'},{iso:'MYS',name:'Malaysia'},{iso:'MMR',name:'Myanmar'},
+  {iso:'PHL',name:'Philippines'},{iso:'SGP',name:'Singapore'},{iso:'THA',name:'Thailand'},
+  {iso:'VNM',name:'Vietnam'}
+];
+const ISO=COUNTRIES.map(c=>c.iso).join(';');
+const SERIES={gdp:'NY.GDP.MKTP.KD',gdppc:'NY.GDP.PCAP.KD',co2:'EN.GHG.CO2.MT.CE.AR5',co2pc:'EN.GHG.CO2.PC.CE.AR5'};
+const NAME={}; COUNTRIES.forEach(c=>NAME[c.iso]=c.name);
+
+let DATA={}; // iso -> {gdp:{yr:v}, ...}
+let computed=[]; // current rows
+
+const $=s=>document.querySelector(s);
+
+async function fetchSeries(code){
+  const url=`https://api.worldbank.org/v2/country/${ISO}/indicator/${code}?format=json&per_page=20000&date=1990:2025`;
+  const r=await fetch(url);
+  if(!r.ok) throw new Error('HTTP '+r.status+' for '+code);
+  const j=await r.json();
+  if(!Array.isArray(j)||!j[1]) throw new Error('Unexpected shape for '+code);
+  return j[1];
+}
+
+async function load(){
+  try{
+    const codes=Object.values(SERIES);
+    const results=await Promise.all(codes.map(fetchSeries));
+    COUNTRIES.forEach(c=>DATA[c.iso]={gdp:{},gdppc:{},co2:{},co2pc:{}});
+    const keys=Object.keys(SERIES);
+    results.forEach((rows,i)=>{
+      const key=keys[i];
+      rows.forEach(d=>{
+        const iso=d.countryiso3code, yr=+d.date, v=d.value;
+        if(DATA[iso]&&v!=null&&!isNaN(v)) DATA[iso][key][yr]=v;
+      });
+    });
+    // global latest shared year across countries
+    let allYears=new Set();
+    COUNTRIES.forEach(c=>{
+      const d=DATA[c.iso];
+      Object.keys(d.gdp).forEach(y=>{ if(d.co2[y]!=null) allYears.add(+y); });
+    });
+    const latest=Math.max(...allYears);
+    $('#status').innerHTML=`<span>Live · data through <b>${latest}</b></span><span>10 economies</span><span>4 World Bank series</span><span><b>${(results.flat().length).toLocaleString()}</b> observations fetched</span>`;
+    initControls();
+    recompute();
+    buildSelector();
+  }catch(e){
+    $('#status').innerHTML='';
+    $('#scatter-card').innerHTML=`<div class="err"><b>Couldn't reach the World Bank API.</b><br>${e.message}. This usually means a network or CORS block — try opening the page directly in a browser tab (not inside a sandboxed preview), or reload. The dashboard fetches <code>api.worldbank.org</code> on load.</div>`;
+    console.error(e);
+  }
+}
+
+// ---- helpers ----
+function latestSharedYear(iso){
+  const d=DATA[iso]; let best=null;
+  for(const y in d.gdp){ if(d.co2[y]!=null && d.gdppc[y]!=null && d.co2pc[y]!=null){ const yy=+y; if(best==null||yy>best) best=yy; } }
+  return best;
+}
+function valAtOrAfter(map,start){ // nearest year >= start with data, for window base
+  let best=null;
+  for(const y in map){ const yy=+y; if(yy>=start){ if(best==null||yy<best) best=yy; } }
+  return best;
+}
+function cagr(v0,v1,years){ if(v0==null||v1==null||v0<=0||v1<=0||years<=0) return null; return Math.pow(v1/v0,1/years)-1; }
+function zs(vals){ const v=vals.filter(x=>x!=null); if(!v.length) return vals.map(()=>0);
+  const m=v.reduce((s,x)=>s+x,0)/v.length; const sd=Math.sqrt(v.reduce((s,x)=>s+(x-m)**2,0)/v.length)||1;
+  return vals.map(x=>x==null?0:(x-m)/sd); }
+function ols(pts){ const n=pts.length; if(n<2) return null; let sx=0,sy=0,sxx=0,sxy=0;
+  for(const [x,y] of pts){sx+=x;sy+=y;sxx+=x*x;sxy+=x*y;}
+  const den=n*sxx-sx*sx; if(den===0) return null;
+  const b=(n*sxy-sx*sy)/den; const a=(sy-b*sx)/n; return {a,b}; }
+const fmtPct=x=>x==null?'—':(x>=0?'+':'')+(x*100).toFixed(0)+'%';
+const fmtPct1=x=>x==null?'—':(x>=0?'+':'')+(x*100).toFixed(1)+'%';
+const fmt2=x=>x==null?'—':x.toFixed(2);
+
+function recompute(){
+  const start=+$('#yr').value;
+  const rows=COUNTRIES.map(c=>{
+    const iso=c.iso, d=DATA[iso];
+    const lat=latestSharedYear(iso);
+    if(lat==null) return {iso,name:c.name,missing:true};
+    const baseYrG=valAtOrAfter(d.gdp,start), baseYrC=valAtOrAfter(d.co2,start);
+    const span=lat-Math.max(baseYrG||start,baseYrC||start);
+    const gdp0=d.gdp[baseYrG], gdp1=d.gdp[lat];
+    const co20=d.co2[baseYrC], co21=d.co2[lat];
+    const gdpChg=(gdp0&&gdp1)?gdp1/gdp0-1:null;
+    const co2Chg=(co20&&co21)?co21/co20-1:null;
+    const gap=(gdpChg!=null&&co2Chg!=null)?gdpChg-co2Chg:null;
+    // intensity = co2 total / real gdp
+    const int0=(co20&&gdp0)?co20/gdp0:null, int1=(co21&&gdp1)?co21/gdp1:null;
+    const intTrend=cagr(int0,int1,span); // negative good
+    let cls='no';
+    if(gdpChg>0&&co2Chg<=0) cls='abs';
+    else if(gdpChg>0&&co2Chg!=null&&co2Chg<gdpChg) cls='rel';
+    const stale=lat<2021;
+    return {iso,name:c.name,lat,span,gdpChg,co2Chg,gap,intTrend,
+      co2pc:d.co2pc[lat],gdppc:d.gdppc[lat],cls,stale,missing:false};
+  });
+  // z-scores for composite
+  const valid=rows.filter(r=>!r.missing);
+  const zGap=zs(rows.map(r=>r.missing?null:r.gap));
+  const zInt=zs(rows.map(r=>r.missing?null:(r.intTrend==null?null:-r.intTrend))); // falling intensity good
+  const zLow=zs(rows.map(r=>r.missing?null:(r.co2pc==null?null:-r.co2pc))); // lower good
+  let w1=+$('#w1').value,w2=+$('#w2').value,w3=+$('#w3').value;
+  const wsum=(w1+w2+w3)||1; w1/=wsum;w2/=wsum;w3/=wsum;
+  rows.forEach((r,i)=>{ r.score=r.missing?null:(zGap[i]*w1+zInt[i]*w2+zLow[i]*w3); });
+  // residual: OLS co2pc ~ log(gdppc) over valid
+  const pts=valid.filter(r=>r.co2pc>0&&r.gdppc>0).map(r=>[Math.log(r.gdppc),r.co2pc]);
+  const fit=ols(pts);
+  rows.forEach(r=>{ r.resid=(fit&&r.gdppc>0&&r.co2pc!=null)? r.co2pc-(fit.a+fit.b*Math.log(r.gdppc)) : null; });
+  computed=rows; computed._fit=fit;
+  renderScatter(); renderRank(); renderDiverge(); renderTable();
+}
+
+// ---- 01 scatter ----
+function renderScatter(){
+  const rows=computed.filter(r=>!r.missing&&r.gdppc>0&&r.co2pc!=null);
+  const W=760,H=420,P={l:54,r:24,t:20,b:46};
+  const xs=rows.map(r=>Math.log(r.gdppc)), ys=rows.map(r=>r.co2pc);
+  const xmin=Math.min(...xs)-.25,xmax=Math.max(...xs)+.25;
+  const ymin=0,ymax=Math.max(...ys)*1.1;
+  const X=v=>P.l+(v-xmin)/(xmax-xmin)*(W-P.l-P.r);
+  const Y=v=>H-P.b-(v-ymin)/(ymax-ymin)*(H-P.t-P.b);
+  const fit=computed._fit;
+  let g=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Income vs emissions scatter">`;
+  // grid + y ticks
+  for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4;const y=Y(v);
+    g+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="#234349" stroke-width="1"/>`;
+    g+=`<text x="${P.l-10}" y="${y+4}" fill="#7E969C" font-size="11" text-anchor="end">${v.toFixed(0)}</text>`;}
+  // x ticks (income in $)
+  [1000,3000,10000,30000,90000].forEach(d=>{const lx=Math.log(d);if(lx<xmin||lx>xmax)return;const x=X(lx);
+    g+=`<text x="${x}" y="${H-P.b+20}" fill="#7E969C" font-size="11" text-anchor="middle">$${d>=1000?(d/1000)+'k':d}</text>`;});
+  g+=`<text x="${(P.l+W-P.r)/2}" y="${H-6}" fill="#56727A" font-size="11" text-anchor="middle">GDP per capita (log)</text>`;
+  g+=`<text transform="translate(15 ${(P.t+H-P.b)/2}) rotate(-90)" fill="#56727A" font-size="11" text-anchor="middle">CO₂ per capita (t)</text>`;
+  // trend line
+  if(fit){const x1=xmin,x2=xmax;const y1=fit.a+fit.b*x1,y2=fit.a+fit.b*x2;
+    g+=`<line x1="${X(x1)}" y1="${Y(Math.max(0,y1))}" x2="${X(x2)}" y2="${Y(Math.max(0,y2))}" stroke="#56727A" stroke-width="1.5" stroke-dasharray="5 4"/>`;}
+  // points
+  rows.forEach(r=>{const x=X(Math.log(r.gdppc)),y=Y(r.co2pc);
+    const col=r.resid<=0?'var(--jade)':'var(--ember)';
+    // residual stem
+    if(fit){const py=Y(Math.max(0,fit.a+fit.b*Math.log(r.gdppc)));
+      g+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${py}" stroke="${col}" stroke-width="1" opacity=".35"/>`;}
+    g+=`<circle cx="${x}" cy="${y}" r="6" fill="${col}" stroke="var(--ink)" stroke-width="1.5"/>`;
+    const anchor=x>W-130?'end':'start';const dx=x>W-130?-10:10;
+    g+=`<text x="${x+dx}" y="${y+4}" fill="var(--bone)" font-size="11" text-anchor="${anchor}">${r.name}</text>`;});
+  g+='</svg>';
+  $('#scatter-card').innerHTML=g;
+}
+
+// ---- 03 composite rank ----
+function renderRank(){
+  const rows=computed.filter(r=>!r.missing&&r.score!=null).sort((a,b)=>b.score-a.score);
+  const max=Math.max(...rows.map(r=>Math.abs(r.score)))||1;
+  $('#rank').innerHTML=rows.map((r,i)=>{
+    const pos=(r.score>=0); const w=Math.abs(r.score)/max*100;
+    const col=pos?'var(--jade)':'var(--ember)';
+    return `<div class="row">
+      <span class="pos">${String(i+1).padStart(2,'0')}</span>
+      <span class="nm">${r.name}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${col}"></div></div>
+      <span class="val" style="color:${col}">${r.score>=0?'+':''}${r.score.toFixed(2)}</span>
+    </div>`;}).join('');
+}
+
+// ---- 04 diverging ----
+function renderDiverge(){
+  const rows=computed.filter(r=>!r.missing&&r.gdpChg!=null&&r.co2Chg!=null)
+    .sort((a,b)=>(b.gap||0)-(a.gap||0));
+  const max=Math.max(...rows.flatMap(r=>[Math.abs(r.gdpChg),Math.abs(r.co2Chg)]))||1;
+  const half=v=>Math.min(50,Math.abs(v)/max*50);
+  $('#diverge').innerHTML=rows.map(r=>{
+    const gw=half(r.gdpChg), cw=half(r.co2Chg);
+    const gdpRight=r.gdpChg>=0, co2Left=r.co2Chg<=0;
+    const gdpSeg=`<div class="dseg" style="background:var(--jade);left:${gdpRight?50:50-gw}%;width:${gw}%"></div>`;
+    const co2Seg=`<div class="dseg" style="background:var(--ember);left:${co2Left?50-cw:50}%;width:${cw}%"></div>`;
+    return `<div class="dbar"><span class="nm">${r.name}</span>
+      <div class="dwrap">${co2Seg}${gdpSeg}<div class="dmid"></div></div></div>
+      <div style="display:grid;grid-template-columns:128px 1fr;gap:12px;margin:-4px 0 8px">
+        <span></span><span style="font-family:'JetBrains Mono';font-size:11px;color:var(--muted)">
+        CO₂ ${fmtPct(r.co2Chg)} · GDP ${fmtPct(r.gdpChg)} · gap ${fmtPct(r.gap)}</span></div>`;
+  }).join('');
+}
+
+// ---- 05 time series ----
+function buildSelector(){
+  $('#ts-country').innerHTML=COUNTRIES.map(c=>`<option value="${c.iso}">${c.name}</option>`).join('');
+  $('#ts-country').value='VNM';
+  $('#ts-country').addEventListener('change',renderTS);
+  renderTS();
+}
+function renderTS(){
+  const iso=$('#ts-country').value, d=DATA[iso], start=+$('#yr').value;
+  const years=[]; for(let y=start;y<=2025;y++){ if(d.gdp[y]!=null&&d.co2[y]!=null) years.push(y); }
+  if(years.length<2){ $('#ts-card').innerHTML=`<div class="err">Not enough overlapping GDP and CO₂ data for ${NAME[iso]} from ${start}.</div>`; return; }
+  const g0=d.gdp[years[0]], c0=d.co2[years[0]];
+  const gi=years.map(y=>d.gdp[y]/g0*100), ci=years.map(y=>d.co2[y]/c0*100);
+  const W=760,H=360,P={l:48,r:20,t:18,b:38};
+  const ymin=Math.min(80,...gi,...ci), ymax=Math.max(...gi,...ci)*1.04;
+  const X=i=>P.l+i/(years.length-1)*(W-P.l-P.r);
+  const Y=v=>H-P.b-(v-ymin)/(ymax-ymin)*(H-P.t-P.b);
+  let g=`<svg viewBox="0 0 ${W} ${H}">`;
+  for(let i=0;i<=4;i++){const v=ymin+(ymax-ymin)*i/4;const y=Y(v);
+    g+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="#234349"/>`;
+    g+=`<text x="${P.l-8}" y="${y+4}" fill="#7E969C" font-size="11" text-anchor="end">${v.toFixed(0)}</text>`;}
+  years.forEach((yr,i)=>{ if(i%Math.ceil(years.length/6)===0||i===years.length-1)
+    g+=`<text x="${X(i)}" y="${H-P.b+18}" fill="#7E969C" font-size="11" text-anchor="middle">${yr}</text>`;});
+  const path=arr=>arr.map((v,i)=>`${i?'L':'M'}${X(i).toFixed(1)} ${Y(v).toFixed(1)}`).join(' ');
+  g+=`<path d="${path(ci)}" fill="none" stroke="var(--ember)" stroke-width="2.5"/>`;
+  g+=`<path d="${path(gi)}" fill="none" stroke="var(--jade)" stroke-width="2.5"/>`;
+  const lastG=gi[gi.length-1], lastC=ci[ci.length-1];
+  g+=`<circle cx="${X(years.length-1)}" cy="${Y(lastG)}" r="4" fill="var(--jade)"/>`;
+  g+=`<circle cx="${X(years.length-1)}" cy="${Y(lastC)}" r="4" fill="var(--ember)"/>`;
+  g+='</svg>';
+  $('#ts-card').innerHTML=g;
+}
+
+// ---- 06 table ----
+let sortKey='score',sortAsc=false;
+const COLS=[
+  {k:'name',label:'Economy'},{k:'cls',label:'Status'},
+  {k:'gdpChg',label:'GDP Δ',f:fmtPct},{k:'co2Chg',label:'CO₂ Δ',f:fmtPct},
+  {k:'gap',label:'Gap',f:fmtPct},{k:'intTrend',label:'Intensity/yr',f:fmtPct1},
+  {k:'co2pc',label:'CO₂/cap',f:fmt2},{k:'resid',label:'Residual',f:fmt2},
+  {k:'score',label:'Score',f:x=>x==null?'—':(x>=0?'+':'')+x.toFixed(2)},{k:'lat',label:'Year'}
+];
+function renderTable(){
+  const rows=computed.filter(r=>!r.missing).slice().sort((a,b)=>{
+    let av=a[sortKey],bv=b[sortKey];
+    if(typeof av==='string') return sortAsc?av.localeCompare(bv):bv.localeCompare(av);
+    av=av==null?-1e9:av; bv=bv==null?-1e9:bv; return sortAsc?av-bv:bv-av;
+  });
+  let h='<thead><tr>'+COLS.map(c=>`<th data-k="${c.k}" class="${sortKey===c.k?'arrow '+(sortAsc?'asc':''):''}">${c.label}</th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{
+    const clsLabel={abs:'<span class="pill abs">absolute</span>',rel:'<span class="pill rel">relative</span>',no:'<span class="pill no">none</span>'}[r.cls];
+    h+=`<tr><td>${r.name}${r.stale?' <span class="flag" title="latest year before 2021">⚑</span>':''}</td><td>${clsLabel}</td>`;
+    ['gdpChg','co2Chg','gap','intTrend','co2pc','resid','score'].forEach(k=>{
+      const col=COLS.find(c=>c.k===k);let v=r[k];let cl='';
+      if((k==='gap'||k==='score')&&v!=null) cl=v>=0?'style="color:var(--jade)"':'style="color:var(--ember)"';
+      if(k==='resid'&&v!=null) cl=v<=0?'style="color:var(--jade)"':'style="color:var(--ember)"';
+      if(k==='intTrend'&&v!=null) cl=v<=0?'style="color:var(--jade)"':'style="color:var(--ember)"';
+      h+=`<td class="num" ${cl}>${col.f(v)}</td>`;});
+    h+=`<td class="num">${r.lat}</td></tr>`;
+  });
+  h+='</tbody>';
+  const t=$('#tbl'); t.innerHTML=h;
+  t.querySelectorAll('th').forEach(th=>th.addEventListener('click',()=>{
+    const k=th.dataset.k; if(sortKey===k) sortAsc=!sortAsc; else {sortKey=k;sortAsc=false;} renderTable();
+  }));
+  $('#tbl-note').textContent=`Window: ${$('#yr').value} → latest shared year per country. ⚑ = latest year predates 2021.`;
+}
+
+// ---- controls ----
+function initControls(){
+  const sync=(id,out,suf='')=>{const e=$('#'+id);const o=$('#'+out);
+    e.addEventListener('input',()=>{o.textContent=e.value+suf; if(id==='yr'){recompute();renderTS();}else recompute();});};
+  $('#yr').addEventListener('input',()=>{$('#yr-out').textContent=$('#yr').value;recompute();renderTS();});
+  ['w1','w2','w3'].forEach((id,i)=>{$('#'+id).addEventListener('input',()=>{$('#'+id+'-out').textContent=$('#'+id).value+'%';recompute();});});
+}
+load();
+</script>
+</body>
+</html>
